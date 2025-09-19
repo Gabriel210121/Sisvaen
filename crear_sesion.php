@@ -32,11 +32,9 @@ if (!isset($_SESSION['id_usuario']) || ($_SESSION['rol'] !== 'enfermero' && $_SE
     exit;
 }
 
-// ---------------- VARIABLES PARA MENSAJES ----------------
 $mensaje = "";
-$clase_alerta = "info"; // Bootstrap: info, success, danger, warning
+$clase_alerta = "info"; 
 
-// ---------------- PROCESAR FORMULARIO ----------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Recibir datos del formulario
     $titulo      = trim($_POST['titulo']);
