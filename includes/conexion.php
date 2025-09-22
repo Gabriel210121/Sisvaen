@@ -8,10 +8,10 @@
  *              Configura el charset UTF-8 y maneja errores con 
  *              excepciones para mayor seguridad.
  */
-$host = "localhost";   // Dirección del servidor MySQL
-$user = "root";        // Usuario de la base de datos
-$pass = "";            // Contraseña del usuario
-$db   = "sisvaen";     // Nombre de la base de datos (cámbialo si es necesario)
+$host = gentenv("mysql.railway.internal");   // Dirección del servidor MySQL
+$user = gentenv("root");        // Usuario de la base de datos
+$pass = gentenv("zInmxdKMiDVEGhpYBSaDQANWsuNvEgpL");            // Contraseña del usuario
+$db   = gentenv("railway");     // Nombre de la base de datos (cámbialo si es necesario)
 
 //REPORTAR ERRORES DE MYSQLI 
 // Configuramos mysqli para que lance excepciones en lugar de warnings.

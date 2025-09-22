@@ -5,19 +5,8 @@
  * Fecha: 08/09/2025
  * Descripción: Permite a los aprendices registrar su asistencia
  *              en una sesión activa dentro del sistema SISVAEN.
- *
- * Flujo de trabajo:
- *   1. Valida que el usuario tenga rol "aprendiz".
- *   2. Verifica si existe una sesión activa en la variable $_SESSION.
- *   3. Si el aprendiz no existe en la BD, se crea un registro nuevo.
- *   4. Se guarda la asistencia en la tabla `asistencias` con fecha y hora.
- *   5. Muestra mensajes de éxito o advertencia.
- *
- * Notas:
- *   - Solo los aprendices autenticados pueden acceder a este archivo.
- *   - Si no hay sesión activa, se muestra un aviso y un botón de regreso.
- *   - Se usan sentencias preparadas para mayor seguridad 
  */
+
 session_start();
 require_once 'includes/conexion.php';
 
@@ -36,17 +25,32 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['rol'] !== 'aprendiz') {
     exit;
 }
 
-// Verificar si existe una sesión activa
-if (!isset($_SESSION['id_sesion'])) {
-    $sin_sesion_activa = true;
-} else {
-    $sin_sesion_activa = false;
+$mensaje = "";
+$sin_sesion_activa = true;
+$id_sesion = null;
+
+// 🔹 Verificar si llega un código por GET o si ya existe una sesión guardada
+if (isset($_GET['codigo'])) {
+    $codigo = trim($_GET['codigo']);
+
+    // Buscar la sesión en la BD
+    $stmt = $conexion->prepare("SELECT id_sesion FROM sesiones WHERE codigo = ? AND estado = 'activa'");
+    $stmt->bind_param("s", $codigo);
+    $stmt->execute();
+    $stmt->bind_result($id_sesion_encontrado);
+
+    if ($stmt->fetch()) {
+        $_SESSION['id_sesion'] = $id_sesion_encontrado;
+        $id_sesion = $id_sesion_encontrado;
+        $sin_sesion_activa = false;
+    }
+    $stmt->close();
+} elseif (isset($_SESSION['id_sesion'])) {
     $id_sesion = (int) $_SESSION['id_sesion'];
+    $sin_sesion_activa = false;
 }
 
-$mensaje = "";
-
-// Procesar formulario solo si existe sesión activa
+// 🔹 Procesar formulario si existe sesión activa
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$sin_sesion_activa) {
     // Capturar datos del formulario
     $nombre     = trim($_POST['nombre'] ?? '');
@@ -56,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$sin_sesion_activa) {
     $ficha      = trim($_POST['ficha'] ?? '');
     $jornada    = trim($_POST['jornada'] ?? '');
     $programa   = trim($_POST['programa_tecnologico'] ?? '');
-    $genero     = $_POST['genero'] ?? null;        
+    $genero     = $_POST['genero'] ?? null;
     $correo     = trim($_POST['correo'] ?? '');
     $telefono   = trim($_POST['telefono'] ?? '');
 
@@ -82,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$sin_sesion_activa) {
         $stmt->execute();
         $id_aprendiz = $conexion->insert_id;
         $stmt->close();
-    } 
+    }
 
     // Registrar la asistencia
     $stmt = $conexion->prepare("
@@ -114,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$sin_sesion_activa) {
 
         <?php if ($sin_sesion_activa): ?>
             <div class="alert alert-warning text-center">
-                ⚠️ No hay una sesión activa en tu sesión de usuario. Ingresa primero el código de sesión para poder registrar asistencia.
+                ⚠️ No hay una sesión activa. Ingresa primero el código de sesión en el panel del aprendiz.
             </div>
             <div class="text-center">
                 <a href="panel_aprendiz.php" class="btn btn-primary">Volver al Panel del Aprendiz</a>
