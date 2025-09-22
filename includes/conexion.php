@@ -8,25 +8,24 @@
  *              Configura el charset UTF-8 y maneja errores con 
  *              excepciones para mayor seguridad.
  */
-$host = gentenv("mysql.railway.internal");   // Dirección del servidor MySQL
-$user = gentenv("root");        // Usuario de la base de datos
-$pass = gentenv("zInmxdKMiDVEGhpYBSaDQANWsuNvEgpL");            // Contraseña del usuario
-$db   = gentenv("railway");     // Nombre de la base de datos (cámbialo si es necesario)
 
-//REPORTAR ERRORES DE MYSQLI 
-// Configuramos mysqli para que lance excepciones en lugar de warnings.
-// Esto facilita la captura de errores con try/catch.
+$host = getenv("MYSQLHOST");       // Host de la DB (ej: mysql.railway.internal)
+$user = getenv("MYSQLUSER");       // Usuario
+$pass = getenv("MYSQLPASSWORD");   // Contraseña
+$db   = getenv("MYSQLDATABASE");   // Nombre de la base de datos
+$port = getenv("MYSQLPORT");       // Puerto (normalmente 3306)
+
+// Reportar errores como excepciones
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    // CREAR CONEXIÓN 
-    $conexion = new mysqli($host, $user, $pass, $db);
+    // Crear conexión
+    $conexion = new mysqli($host, $user, $pass, $db, $port);
 
-    // CONFIGURAR CHARSET 
+    // Configurar charset
     $conexion->set_charset("utf8mb4");
 
 } catch (mysqli_sql_exception $e) {
-    // MANEJO DE ERRORES 
     die("❌ Error de conexión: " . $e->getMessage());
 }
 ?>
